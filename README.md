@@ -174,12 +174,21 @@ class MemoryStorage(BaseStorage):
 # don't forget to make a pull request to the patch's github 😉
 ```
 
+## Using filters with outer_middlewares
+```python
+async def my_filter(_, __, query) -> bool:
+    some_data = await query.middleware_helper.get_data('my_value_name')
+    await query.middleware_helper.insert_data('some_data', 'some_data' + some_data)
+    return True  # False
+digit_filter = filters.create(my_filter)
+```
+
 # Contributing
 Pull requests are welcome. For major changes, please open a question first to discuss what you would like to change.
 
 Be sure to update tests as needed.
 
-more details: https://kotttee.xyz/docs/pyrogram-patch/
+more details: https://kotttee.xyz/docs/pyrogram_patch/
 
 github: https://github.com/kotttee/pyrogram_patch
 ## License

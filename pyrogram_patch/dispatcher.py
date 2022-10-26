@@ -39,17 +39,21 @@ class PatchedDispatcher(Dispatcher):
                     else (None, type(None))
                 )
                 middleware_helper = MiddlewareHelper()
+                if self.pyrogram_middleware_patch_fsm_storage:
+                    if type(parsed_update) in [pyrogram.types.messages_and_media.message.Message]:
+                        await middleware_helper._include_state(parsed_update,
+                                                               self.pyrogram_middleware_patch_fsm_storage)
+
                 if len(self.pyrogram_middleware_patch_outer_middlewares) > 0:
                     for middleware in self.pyrogram_middleware_patch_outer_middlewares:
                         if middleware == handler_type:
                             await middleware_helper._process_middleware(parsed_update, middleware)
-                if self.pyrogram_middleware_patch_fsm_storage:
-                    if type(parsed_update) in [pyrogram.types.messages_and_media.message.Message]:
-                        await middleware_helper._include_state(parsed_update, self.pyrogram_middleware_patch_fsm_storage)
                 async with lock:
                     for group in self.groups.values():
                         for handler in group:
                             args = None
+                            if type(parsed_update) in [pyrogram.types.messages_and_media.message.Message]:
+                                parsed_update.middleware_helper = middleware_helper
                             if isinstance(handler, handler_type):
                                 try:
                                     if await handler.check(self.client, parsed_update):

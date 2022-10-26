@@ -1,10 +1,7 @@
 from pyrogram import Client, filters
-from pyrogram_patch import patch
-from pyrogram_patch.fsm.storages import MemoryStorage
-from pyrogram_patch.fsm import State, StateFilter
-from pyrogram_patch.fsm import StatesGroup, StateItem
-from pyrogram_patch.middlewares.middleware_types import OnMessageMiddleware
-from pyrogram_patch.middlewares import MiddlewareHelper
+from pyrogram_middleware_patch import patch
+from pyrogram_middleware_patch.middlewares.middleware_types import OnMessageMiddleware
+from pyrogram_middleware_patch.middlewares import MiddlewareHelper
 from pyrogram.types import Message
 
 SESSION_NAME = "bot"
