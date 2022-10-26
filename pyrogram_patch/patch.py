@@ -8,13 +8,13 @@ class PatchManager:
         self.dispatcher = dispatcher
 
     def include_middleware(self, middleware: 'PatchMiddleware') -> None:
-        self.dispatcher.pyrogram_middleware_patch_include_middleware(middleware)
+        self.dispatcher.pyrogram_patch_include_middleware(middleware)
 
     def include_outer_middleware(self, middleware: 'PatchMiddleware') -> None:
-        self.dispatcher.pyrogram_middleware_patch_include_outer_middleware(middleware)
+        self.dispatcher.pyrogram_patch_include_outer_middleware(middleware)
 
     def set_storage(self, storage: BaseStorage) -> None:
-        self.dispatcher.pyrogram_middleware_patch_fsm_storage = storage
+        self.dispatcher.pyrogram_patch_fsm_storage = storage
 
 
 def patch(app: Client) -> PatchManager:

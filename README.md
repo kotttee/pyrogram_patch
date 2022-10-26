@@ -90,6 +90,7 @@ from pyrogram_patch.middlewares.middleware_types
 ```
 
 # FSM
+now work just with on_message
 
 ## Usage
 
@@ -150,7 +151,7 @@ async def process_3(client: Client, message, state: State):
 from pyrogram_patch.fsm import State, BaseStorage
 
 
-class MemoryStorage(BaseStorage):
+class YourStorage(BaseStorage):
 
     def __init__(self) -> None:
         ...
@@ -174,7 +175,8 @@ class MemoryStorage(BaseStorage):
 # don't forget to make a pull request to the patch's github 😉
 ```
 
-## Using filters with outer_middlewares
+## Using filters with outer_middlewares 
+now work just with on_message
 ```python
 async def my_filter(_, __, query) -> bool:
     some_data = await query.middleware_helper.get_data('my_value_name')
