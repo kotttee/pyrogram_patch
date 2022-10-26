@@ -1,8 +1,10 @@
 from pyrogram import Client, filters
-from pyrogram_middleware_patch import patch
-from pyrogram_middleware_patch.middlewares.middleware_types import OnMessageMiddleware
-from pyrogram_middleware_patch.middlewares import MiddlewareHelper
+from pyrogram_patch import patch
+from pyrogram_patch.middlewares.middleware_types import OnMessageMiddleware
+from pyrogram_patch.middlewares import MiddlewareHelper
 from pyrogram.types import Message
+from pyrogram_patch.fsm import State, StateItem, StatesGroup, StateFilter
+from pyrogram_patch.fsm.storages import MemoryStorage
 
 SESSION_NAME = "bot"
 API_ID = 8
@@ -48,15 +50,25 @@ class CheckIgnoreMiddleware(OnMessageMiddleware):
 """APP"""
 
 
+app = Client(...)
+
 patched = patch(app)
 patched.set_storage(MemoryStorage())
-patched.include_middleware(CheckDigitMiddleware())
+patched.include_outer_middleware(CheckDigitMiddleware())
 patched.include_middleware(CheckIgnoreMiddleware(False))
 
 
-@app.on_message(filters.private & StateFilter())
-async def process_1(client: Client, message, state: State, is_digit: bool):
-    print(is_digit)
+async def my_filter_function(_, __, query) -> bool:
+    some_data = await query.middleware_helper.get_data('is_digit')
+    await query.middleware_helper.insert_data('some_data_is_digit', some_data)
+    return True  # False
+
+my_filter = filters.create(my_filter_function)
+
+
+@app.on_message(filters.private & StateFilter() & my_filter)
+async def process_1(client: Client, message, state: State, some_data_is_digit: bool):
+    print(some_data_is_digit)
     if message.text == 'register':
         await client.send_message(message.chat.id, 'enter your weight')
         await state.set_state(Parameters.weight)
