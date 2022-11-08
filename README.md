@@ -185,6 +185,25 @@ async def my_filter(_, __, query) -> bool:
 digit_filter = filters.create(my_filter)
 ```
 
+## Routers
+
+```python
+from pyrogram_patch.router import Router
+
+
+my_router = Router()
+
+@my_router.on_message(filters.me)
+async def my_commands(client, message, my_value_name):
+    print(my_value_name)
+```
+
+main.py
+
+```python
+patch_manager.include_router(my_router)
+```
+
 # Contributing
 Pull requests are welcome. For major changes, please open a question first to discuss what you would like to change.
 
