@@ -17,7 +17,7 @@ class MemoryStorage(BaseStorage):
         self.__storage[key] = state
 
     async def set_data(self, data: dict, key: str) -> None:
-        self.__data_storage[key] = data
+        self.__data_storage[key].update(data)
 
     async def get_data(self, key: str) -> dict:
         if key in self.__data_storage:

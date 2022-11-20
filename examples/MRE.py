@@ -12,7 +12,6 @@ API_ID = 8
 API_HASH = "7245de8e747a0d6fbe11f7cc14fcc0bb"
 BOT_TOKEN = ""
 
-
 """FSM"""
 
 
@@ -36,7 +35,7 @@ class CheckDigitMiddleware(OnMessageMiddleware):
 
 class CheckIgnoreMiddleware(OnMessageMiddleware):
     def __init__(self, ignore: bool) -> None:
-        self.ignore = ignore     # it can be any value you want
+        self.ignore = ignore  # it can be any value you want
 
     # you cannot change the call arguments
     async def __call__(self, message: Message, middleware_helper: MiddlewareHelper):
@@ -54,7 +53,6 @@ app = Client(...)
 router = Router()
 router2 = Router()
 
-
 patched = patch(app)
 patched.set_storage(MemoryStorage())
 patched.include_outer_middleware(CheckDigitMiddleware())
@@ -67,6 +65,7 @@ async def my_filter_function(_, __, query) -> bool:
     some_data = await query.middleware_helper.get_data('is_digit')
     await query.middleware_helper.insert_data('some_data_is_digit', some_data)
     return True  # False
+
 
 my_filter = filters.create(my_filter_function)
 

@@ -4,7 +4,7 @@ import pyrogram
 from pyrogram.dispatcher import Dispatcher
 from pyrogram.dispatcher import log
 from pyrogram.handlers import RawUpdateHandler
-
+from typing import Union
 from pyrogram_patch.fsm import BaseStorage
 
 
@@ -14,7 +14,7 @@ class PatchedDispatcher(Dispatcher):
         super().__init__(client)
         self.pyrogram_patch_middlewares = []
         self.pyrogram_patch_outer_middlewares = []
-        self.pyrogram_patch_fsm_storage: BaseStorage | None = None
+        self.pyrogram_patch_fsm_storage: Union[BaseStorage, None] = None
         self.pyrogram_patch_allowed_update_types = [pyrogram.types.messages_and_media.message.Message]
 
     def pyrogram_patch_include_middleware(self, middleware: object) -> None:

@@ -2,11 +2,10 @@ from .dispatcher import PatchedDispatcher
 from pyrogram import Client
 from pyrogram_patch.fsm import BaseStorage
 from .router import Router
-from typing import Any
 
 
 class PatchManager:
-    def __init__(self, client: Client, storage: BaseStorage | None = None):
+    def __init__(self, client: Client):
         self.client = client
         self.dispatcher = client.dispatcher
 
@@ -32,5 +31,3 @@ def patch(app: Client) -> PatchManager:
     app.__delattr__("dispatcher")
     app.dispatcher = PatchedDispatcher(app)
     return PatchManager(app)
-
-

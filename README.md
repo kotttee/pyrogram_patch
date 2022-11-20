@@ -172,7 +172,7 @@ class YourStorage(BaseStorage):
     async def finish_state(self, key: str) -> None:
         ...
 
-# don't forget to make a pull request to the patch's github 😉
+# don't forget to make a pull request to the patch's GitHub 😉
 ```
 
 ## Using filters with outer_middlewares 
