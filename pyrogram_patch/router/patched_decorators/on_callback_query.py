@@ -17,16 +17,14 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Callable
+
 import pyrogram
+
 import pyrogram_patch
 
 
 class OnCallbackQuery:
-    def on_callback_query(
-        self=None,
-        filters=None,
-        group: int = 0
-    ) -> Callable:
+    def on_callback_query(self=None, filters=None, group: int = 0) -> Callable:
         """Decorator for handling callback queries.
 
         This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
@@ -44,10 +42,16 @@ class OnCallbackQuery:
         def decorator(func: Callable) -> Callable:
             if isinstance(self, pyrogram_patch.router.Router):
                 if self._app is None:
-                    raise RuntimeError('please use *patch*.include_router(*router*) before you run the code')
-                self._app.add_handler(pyrogram.handlers.CallbackQueryHandler(func, filters), group)
+                    raise RuntimeError(
+                        "please use *patch*.include_router(*router*) before you run the code"
+                    )
+                self._app.add_handler(
+                    pyrogram.handlers.CallbackQueryHandler(func, filters), group
+                )
             else:
-                raise RuntimeError('you should only use this in routers, and only as a decorator')
+                raise RuntimeError(
+                    "you should only use this in routers, and only as a decorator"
+                )
 
             return func
 

@@ -19,15 +19,12 @@
 from typing import Callable
 
 import pyrogram
+
 import pyrogram_patch
 
 
 class OnChosenInlineResult:
-    def on_chosen_inline_result(
-        self=None,
-        filters=None,
-        group: int = 0
-    ) -> Callable:
+    def on_chosen_inline_result(self=None, filters=None, group: int = 0) -> Callable:
         """Decorator for handling chosen inline results.
 
         This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
@@ -45,10 +42,16 @@ class OnChosenInlineResult:
         def decorator(func: Callable) -> Callable:
             if isinstance(self, pyrogram_patch.router.Router):
                 if self._app is None:
-                    raise RuntimeError('please use *patch*.include_router(*router*) before you run the code')
-                self._app.add_handler(pyrogram.handlers.ChosenInlineResultHandler(func, filters), group)
+                    raise RuntimeError(
+                        "please use *patch*.include_router(*router*) before you run the code"
+                    )
+                self._app.add_handler(
+                    pyrogram.handlers.ChosenInlineResultHandler(func, filters), group
+                )
             else:
-                raise RuntimeError('you should only use this in routers, and only as a decorator')
+                raise RuntimeError(
+                    "you should only use this in routers, and only as a decorator"
+                )
 
             return func
 

@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from pyrogram_patch.fsm import State
+
+from .states import State
 
 
 class BaseStorage(ABC):
-
     @abstractmethod
     async def checkup(self, key) -> State:
         ...

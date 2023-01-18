@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 
 class State:
-
     def __init__(self, name: str, storage: "BaseStorage", key: str) -> None:
         self.name = name
         self.__storage = storage
@@ -26,11 +25,10 @@ class State:
 
 
 class StateItem:
-
     def __get__(self, obj, cls):
         for name, obj in vars(cls).items():
             if obj is self:
-                return 'StatesGroup_' + cls.__name__ + '_State_' + name
+                return "StatesGroup_" + cls.__name__ + "_State_" + name
 
 
 @dataclass(init=False, frozen=True)

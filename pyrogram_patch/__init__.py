@@ -1,5 +1,4 @@
-from . patch import patch, PatchManager
 from .middlewares import middleware_types
+from .patch import PatchManager, patch
 
-
-__all__ = ['patch', 'PatchManager']
+__all__ = ["patch", "PatchManager"]

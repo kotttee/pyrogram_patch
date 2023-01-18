@@ -1,5 +1,5 @@
+from pyrogram_patch.patch_helper import PatchHelper
+
 from . import middleware_types
-from .middleware_helper import MiddlewareHelper
 
-
-__all__ = ['middleware_types', 'MiddlewareHelper']
+__all__ = ["middleware_types", "PatchHelper"]

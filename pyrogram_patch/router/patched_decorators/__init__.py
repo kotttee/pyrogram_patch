@@ -42,6 +42,6 @@ class PatchedDecorators(
     OnPoll,
     OnChosenInlineResult,
     OnChatMemberUpdated,
-    OnChatJoinRequest
+    OnChatJoinRequest,
 ):
     pass

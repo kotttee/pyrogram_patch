@@ -7,7 +7,7 @@ pyrogram_patch is a Python library this is a library that adds middlewares and f
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
-pip install https://kotttee.xyz/dist/pyrogram_patch.zip
+pip install https://kotttee.xyz/pip/pyrogram_patch
 ```
 
 # Middlewares
@@ -33,7 +33,7 @@ patch_manager.include_middleware(MyMiddleware(*args, **kwargs))
 
 ```python
 from pyrogram_patch.middlewares.middleware_types import OnUpdateMiddleware
-from pyrogram_patch.middlewares import MiddlewareHelper
+from pyrogram_patch.middlewares import PatchHelper
 
 
 class MyMiddleware(OnUpdateMiddleware):
@@ -44,10 +44,10 @@ class MyMiddleware(OnUpdateMiddleware):
         self.value = 'my_value'
 
     # you cannot change the call arguments
-    async def __call__(self, update, middleware_helper: MiddlewareHelper):
+    async def __call__(self, update, patch_helper: PatchHelper):
         # do whatever you want
         # need to return dictionary
-        return await middleware_helper.insert_data('my_value_name', self.value)
+        return await patch_helper.insert_data('my_value_name', self.value)
 
     # get_data() - use this method to get the data you saved earlier
     # skip_handler() - use this method to skip the handler
@@ -83,6 +83,18 @@ on_callback_query - OnCallbackQueryMiddleware
 on_poll - OnPoolMiddleware
 
 OnUpdateMiddleware - middleware that reacts to everything
+
+MixedMiddleware - middleware that reacts to certain types of handlers
+
+pass the types of handlers from pyrogram.handlers during initialization that the malware will process
+
+patch_manager.include_middleware(ExampleMiddleware((MessageHandler, EditedMessageHandler), False))
+
+
+    class ExampleMiddleware(MixedMiddleware):
+    def __init__(self, handlers: tuple, ignore: bool) -> None:
+        self.ignore = ignore  # it can be any value you want
+        super().__init__(handlers)
 ```
 everything you can import from
 ```text
@@ -90,8 +102,8 @@ from pyrogram_patch.middlewares.middleware_types
 ```
 
 # FSM
-now work just with on_message
-
+allowed update types you can manage with 
+app.dispatcher.manage_allowed_update_types(pyrogram.types.Update)
 ## Usage
 
 ```python
@@ -178,9 +190,9 @@ class YourStorage(BaseStorage):
 ## Using filters with outer_middlewares 
 now work just with on_message
 ```python
-async def my_filter(_, __, query) -> bool:
-    some_data = await query.middleware_helper.get_data('my_value_name')
-    await query.middleware_helper.insert_data('some_data', 'some_data' + some_data)
+async def my_filter(_, __, update) -> bool:
+    some_data = await update.patch_helper.get_data('my_value_name')
+    await update.patch_helper.insert_data('some_data', 'some_data' + some_data)
     return True  # False
 digit_filter = filters.create(my_filter)
 ```
@@ -212,5 +224,8 @@ Be sure to update tests as needed.
 more details: https://kotttee.xyz/docs/pyrogram_patch/
 
 github: https://github.com/kotttee/pyrogram_patch
+
+telegram: https://t.me/kotttee
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

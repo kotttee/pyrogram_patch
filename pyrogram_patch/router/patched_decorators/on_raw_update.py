@@ -19,14 +19,12 @@
 from typing import Callable
 
 import pyrogram
+
 import pyrogram_patch
 
 
 class OnRawUpdate:
-    def on_raw_update(
-        self=None,
-        group: int = 0
-    ) -> Callable:
+    def on_raw_update(self=None, group: int = 0) -> Callable:
         """Decorator for handling raw updates.
 
         This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
@@ -40,10 +38,14 @@ class OnRawUpdate:
         def decorator(func: Callable) -> Callable:
             if isinstance(self, pyrogram_patch.router.Router):
                 if self._app is None:
-                    raise RuntimeError('please use *patch*.include_router(*router*) before you run the code')
+                    raise RuntimeError(
+                        "please use *patch*.include_router(*router*) before you run the code"
+                    )
                 self._app.add_handler(pyrogram.handlers.RawUpdateHandler(func), group)
             else:
-                raise RuntimeError('you should only use this in routers, and only as a decorator')
+                raise RuntimeError(
+                    "you should only use this in routers, and only as a decorator"
+                )
 
             return func
 
