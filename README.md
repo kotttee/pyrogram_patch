@@ -188,11 +188,11 @@ class YourStorage(BaseStorage):
 ```
 
 ## Using filters with outer_middlewares 
-now work just with on_message
+only works with a few types of updates
 ```python
 async def my_filter(_, __, update) -> bool:
     some_data = await update.patch_helper.get_data('my_value_name')
-    await update.patch_helper.insert_data('some_data', 'some_data' + some_data)
+    await update.patch_helper.insert_data('my_value_name', 'some_data' + some_data)
     return True  # False
 digit_filter = filters.create(my_filter)
 ```
