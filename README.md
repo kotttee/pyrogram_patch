@@ -191,8 +191,8 @@ class YourStorage(BaseStorage):
 only works with a few types of updates
 ```python
 async def my_filter(_, __, update) -> bool:
-    some_data = await update.patch_helper.get_data('my_value_name')
-    await update.patch_helper.insert_data('my_value_name', 'some_data' + some_data)
+    some_data = await update.patch_helper.get_data('my_value_name') #  this variable is obtained from middleware
+    await update.patch_helper.insert_data('some_data', 'some_data' + some_data) # this one is defined in the filter but both of them will be passed to the handler
     return True  # False
 digit_filter = filters.create(my_filter)
 ```
@@ -206,7 +206,7 @@ from pyrogram_patch.router import Router
 my_router = Router()
 
 @my_router.on_message(filters.me)
-async def my_commands(client, message, my_value_name):
+async def my_commands(client, message, my_value_name, some_data):
     print(my_value_name)
 ```
 
@@ -221,7 +221,7 @@ Pull requests are welcome. For major changes, please open a question first to di
 
 Be sure to update tests as needed.
 
-more details: https://kotttee.xyz/docs/pyrogram_patch/
+
 
 github: https://github.com/kotttee/pyrogram_patch
 
