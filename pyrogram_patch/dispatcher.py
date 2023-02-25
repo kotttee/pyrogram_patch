@@ -126,12 +126,15 @@ class PatchedDispatcher(Dispatcher):
                                     if inspect.iscoroutinefunction(handler.callback):
                                         await handler.callback(self.client, *args, **kwargs)
                                     else:
+                                        args = list(args)
+                                        for v in kwargs.values():
+                                            args.append(v)
+                                        args = tuple(args)
                                         await self.loop.run_in_executor(
                                             self.client.executor,
                                             handler.callback,
                                             self.client,
-                                            *args,
-                                            **kwargs
+                                            *args
                                         )
                                 except pyrogram.StopPropagation:
                                     raise
