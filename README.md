@@ -44,7 +44,7 @@ class MyMiddleware(OnUpdateMiddleware):
         self.value = 'my_value'
 
     # you cannot change the call arguments
-    async def __call__(self, update, patch_helper: PatchHelper):
+    async def __call__(self, update, client, patch_helper: PatchHelper):
         # do whatever you want
         # need to return dictionary
         return await patch_helper.insert_data('my_value_name', self.value)
