@@ -13,7 +13,7 @@ if sys.version_info < MINIMAL_PY_VERSION:
 
 setup(
     name="pyrogram_patch",
-    version="1.3.6",
+    version="1.3.8",
     license="MIT",
     author="kotttee",
     python_requires=">=3.8",
