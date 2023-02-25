@@ -41,13 +41,12 @@ class OnDeletedMessages:
 
         def decorator(func: Callable) -> Callable:
             if isinstance(self, pyrogram_patch.router.Router):
-                if self._app is None:
-                    raise RuntimeError(
-                        "please use *patch*.include_router(*router*) before you run the code"
+                if self._app is not None:
+                    self._app.add_handler(
+                        pyrogram.handlers.DeletedMessagesHandler(func, filters), group
                     )
-                self._app.add_handler(
-                    pyrogram.handlers.DeletedMessagesHandler(func, filters), group
-                )
+                else:
+                    self._decorators_storage.append((pyrogram.handlers.DeletedMessagesHandler(func, filters), group))
             else:
                 raise RuntimeError(
                     "you should only use this in routers, and only as a decorator"
