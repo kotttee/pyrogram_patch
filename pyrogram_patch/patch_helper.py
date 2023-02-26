@@ -1,8 +1,9 @@
 import inspect
-from typing import Any
+from typing import Any, Union
 
 from pyrogram import Client, StopPropagation
 from pyrogram.handlers.handler import Handler
+
 
 # you can modify it
 async def create_key(parsed_update, client: Client) -> str:
@@ -17,7 +18,7 @@ async def create_key(parsed_update, client: Client) -> str:
         if hasattr(parsed_update.message, "chat"):
             if parsed_update.message.chat is not None:
                 chat_id = str(parsed_update.message.chat.id)
-    return str(client.me.id) + user_id + "-" + chat_id
+    return str(client.me.id) + "-" + user_id + "-" + chat_id
 
 
 class PatchHelper:
@@ -47,6 +48,8 @@ class PatchHelper:
         kwargs = {}
         if "state" in arguments:
             kwargs["state"] = self.state
+        if "patch_helper" in arguments:
+            kwargs["patch_helper"] = self
 
         if len(self.__data) > 0:
             for k, v in self.__data.items():
@@ -63,4 +66,8 @@ class PatchHelper:
 
         self.state = await storage.checkup(await create_key(parsed_update, client))
         parsed_update.middleware_patch_state = self.state
+
+    @staticmethod
+    def generate_state_key(client, user_id: Union[int, str] = "unknown", chat_id: Union[int, str] = "unknown") -> str:
+        return str(client.me.id) + "-" + str(user_id) + "-" + str(chat_id)
 

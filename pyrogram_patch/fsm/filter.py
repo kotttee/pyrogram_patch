@@ -8,5 +8,5 @@ class StateFilter:
             return _.state == query.middleware_patch_state.state
         except Exception:
             raise RuntimeError(
-                'you can use this filter only for allowed updates'
+                'check storage'
             )

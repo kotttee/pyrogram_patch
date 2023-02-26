@@ -19,6 +19,12 @@ class State:
     async def finish(self) -> None:
         await self.__storage.finish_state(self.__key)
 
+    async def create_state(self, key: str) -> "State":
+        return await self.__storage.checkup(key)
+
+    def __repr__(self) -> str:
+        return f"state - {self.name}\nkey - {self.__key}"
+
     @property
     def state(self) -> str:
         return self.name
