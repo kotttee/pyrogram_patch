@@ -9,6 +9,7 @@ class State:
 
     async def set_state(self, state) -> None:
         await self.__storage.set_state(state, self.__key)
+        self.name = state
 
     async def set_data(self, data: dict) -> None:
         await self.__storage.set_data(data, self.__key)
