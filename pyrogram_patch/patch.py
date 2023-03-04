@@ -1,6 +1,7 @@
 from pyrogram import Client
 
 from pyrogram_patch.fsm import BaseStorage
+from .patch_data_pool import PatchDataPool
 
 from .dispatcher import PatchedDispatcher
 from .router import Router
@@ -12,13 +13,13 @@ class PatchManager:
         self.dispatcher = client.dispatcher
 
     def include_middleware(self, middleware: "PatchMiddleware") -> None:
-        self.dispatcher.pyrogram_patch_include_middleware(middleware)
+        PatchDataPool.pyrogram_patch_middlewares.append(middleware)
 
     def include_outer_middleware(self, middleware: "PatchMiddleware") -> None:
-        self.dispatcher.pyrogram_patch_include_outer_middleware(middleware)
+        PatchDataPool.pyrogram_patch_outer_middlewares.append(middleware)
 
     def set_storage(self, storage: BaseStorage) -> None:
-        self.dispatcher.pyrogram_patch_fsm_storage = storage
+        PatchDataPool.pyrogram_patch_fsm_storage = storage
 
     def include_router(self, router: Router) -> None:
         router.set_client(self.client)

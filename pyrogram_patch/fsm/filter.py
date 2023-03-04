@@ -1,3 +1,6 @@
+from ..patch_helper import PatchHelper
+
+
 class StateFilter:
     def __init__(self, state: str = "*") -> None:
         self.state = state
@@ -5,7 +8,7 @@ class StateFilter:
 
     def __call__(_, __, query) -> bool:
         try:
-            return _.state == query.middleware_patch_state.state
+            return _.state == PatchHelper.get_from_pool(query).state.name
         except Exception:
             raise RuntimeError(
                 'check storage'

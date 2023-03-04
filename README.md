@@ -46,12 +46,11 @@ class MyMiddleware(OnUpdateMiddleware):
     # you cannot change the call arguments
     async def __call__(self, update, client, patch_helper: PatchHelper):
         # do whatever you want
-        # need to return dictionary
-        return await patch_helper.insert_data('my_value_name', self.value)
+        patch_helper.data['my_value_name'] = self.value
 
     # get_data() - use this method to get the data you saved earlier
     # skip_handler() - use this method to skip the handler
-    # middleware_helper.state.state - this way you can get the current state
+    # patch_helper.state.state - this way you can get the current state
 ```
 
 
@@ -134,7 +133,8 @@ class Parameters(StatesGroup):
 ## Processing and filtering data
 
 ```python
-from pyrogram_patch.fsm import StateFilter, State
+from pyrogram_patch.fsm import State
+from pyrogram_patch.fsm.filter import StateFilter
 
 
 @app.on_message(filters.private & StateFilter()) # the same as StateFilter("*"), catches all states
@@ -191,10 +191,12 @@ class YourStorage(BaseStorage):
 only works with a few types of updates
 ```python
 async def my_filter(_, __, update) -> bool:
-    some_data = await update.patch_helper.get_data('my_value_name') #  this variable is obtained from middleware
-    await update.patch_helper.insert_data('some_data', 'some_data' + some_data) # this one is defined in the filter but both of them will be passed to the handler
-    return True  # False
-digit_filter = filters.create(my_filter)
+    if hasattr(update, "text"):
+        patch_helper = PatchHelper.get_from_pool(update)
+        patch_helper.data["integer"] = 1
+        return True  # False
+    return False
+my_filter = filters.create(my_filter)
 ```
 
 ## Routers

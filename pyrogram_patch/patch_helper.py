@@ -1,6 +1,6 @@
 import inspect
 from typing import Any, Union
-
+from .patch_data_pool import PatchDataPool
 from pyrogram import Client, StopPropagation
 from pyrogram.handlers.handler import Handler
 
@@ -26,22 +26,9 @@ class PatchHelper:
         self.__data = {}
         self.state = "*"
 
-    async def insert_data(self, argument_name: str, value: Any) -> None:
-        """use this method to pass data to handler or next middleware"""
-        self.__data[argument_name] = value
-
-    async def get_data(self, argument_name: str) -> Any:
-        """use this method to get the data you saved earlier"""
-        try:
-            return self.__data[argument_name]
-        except KeyError:
-            raise RuntimeError(
-                f"you are trying to get an argument {argument_name} by calling the get_data method but you haven't given it a value yet"
-            )
-
     async def skip_handler(self) -> None:
         """use this method to skip the handler"""
-        raise StopPropagation("Please ignore this error")
+        raise StopPropagation("please ignore this error, it is raised by the PatchHelper.skip_handler method in one of your middlewares")
 
     async def _get_data_for_handler(self, arguments) -> dict:
         """PLEASE DON'T USE THIS"""
@@ -63,11 +50,22 @@ class PatchHelper:
 
     async def _include_state(self, parsed_update, storage, client):
         """PLEASE DON'T USE THIS"""
-
         self.state = await storage.checkup(await create_key(parsed_update, client))
-        parsed_update.middleware_patch_state = self.state
+
+    @classmethod
+    def get_from_pool(cls, update):
+        helper = PatchDataPool.get_helper_from_pool(update)
+        if helper is None:
+            return cls()
+        return helper
 
     @staticmethod
-    def generate_state_key(client, user_id: Union[int, str] = "unknown", chat_id: Union[int, str] = "unknown") -> str:
-        return str(client.me.id) + "-" + str(user_id) + "-" + str(chat_id)
+    def generate_state_key(client_id: int, user_id: Union[int, str] = "unknown", chat_id: Union[int, str] = "unknown") -> str:
+        return str(client_id) + "-" + str(user_id) + "-" + str(chat_id)
 
+    @property
+    def data(self) -> dict:
+        return self.__data
+
+    def __repr__(self) -> str:
+        return f"PatchHelper(state: {self.state} | data: {self.__data})"

@@ -24,7 +24,7 @@ class State:
         return await self.__storage.checkup(key)
 
     def __repr__(self) -> str:
-        return f"state - {self.name}\nkey - {self.__key}"
+        return f"State(name - {self.name} | key - {self.__key})"
 
     @property
     def state(self) -> str:

@@ -5,7 +5,7 @@ from typing import Union
 import pyrogram
 from pyrogram.dispatcher import Dispatcher, log
 from pyrogram.handlers import RawUpdateHandler
-
+from .patch_data_pool import PatchDataPool
 from pyrogram_patch.fsm import BaseStorage
 from pyrogram_patch.middlewares import PatchHelper
 
@@ -13,26 +13,7 @@ from pyrogram_patch.middlewares import PatchHelper
 class PatchedDispatcher(Dispatcher):
     def __init__(self, client: pyrogram.Client):
         super().__init__(client)
-        self.pyrogram_patch_middlewares = []
-        self.pyrogram_patch_outer_middlewares = []
-        self.pyrogram_patch_fsm_storage: Union[BaseStorage, None] = None
-        self.pyrogram_patch_allowed_update_types = [
-            pyrogram.types.messages_and_media.message.Message,
-            pyrogram.types.CallbackQuery,
-        ]
-
-    def pyrogram_patch_include_middleware(self, middleware: object) -> None:
-        self.pyrogram_patch_middlewares.append(middleware)
-
-    def pyrogram_patch_include_outer_middleware(self, middleware: object) -> None:
-        self.pyrogram_patch_outer_middlewares.append(middleware)
-
-    def manage_allowed_update_types(self, pyrogram_types, include: bool = True) -> None:
-        if include:
-            self.pyrogram_patch_allowed_update_types.append(pyrogram_types)
-        else:
-            with suppress(ValueError):
-                self.pyrogram_patch_allowed_update_types.remove(pyrogram_types)
+        self.patch_data_pool = PatchDataPool
 
     async def handler_worker(self, lock):
         while True:
@@ -51,99 +32,92 @@ class PatchedDispatcher(Dispatcher):
                     else (None, type(None))
                 )
 
-                # include state
-                if type(parsed_updates) != list:
-                    parsed_updates = [parsed_updates]
+                if parsed_updates is None:
+                    continue
 
-                for parsed_update in parsed_updates:
+                patch_helper = PatchHelper()
+                PatchDataPool.include_helper_to_pool(parsed_updates, patch_helper)
 
-                    patch_helper = PatchHelper()
-                    if parsed_update is not None:
-                        parsed_update.patch_helper = patch_helper
-                    if self.pyrogram_patch_fsm_storage:
-                        if type(parsed_update) in self.pyrogram_patch_allowed_update_types:
-                            await patch_helper._include_state(
-                                parsed_update, self.pyrogram_patch_fsm_storage, self.client
-                            )
+                if PatchDataPool.pyrogram_patch_fsm_storage:
+                    await patch_helper._include_state(
+                        parsed_updates, PatchDataPool.pyrogram_patch_fsm_storage, self.client
+                    )
 
-                    # process outer middlewares
-                    if len(self.pyrogram_patch_outer_middlewares) > 0:
-                        for middleware in self.pyrogram_patch_outer_middlewares:
-                            if middleware == handler_type:
-                                await patch_helper._process_middleware(
-                                    parsed_update, middleware, self.client
-                                )
+                # process outer middlewares
+                for middleware in PatchDataPool.pyrogram_patch_outer_middlewares:
+                    if middleware == handler_type:
+                        await patch_helper._process_middleware(
+                            parsed_updates, middleware, self.client
+                        )
 
-                    async with lock:
-                        for group in self.groups.values():
-                            for handler in group:
-                                args = None
+                async with lock:
+                    for group in self.groups.values():
+                        for handler in group:
+                            args = None
 
-                                if isinstance(handler, handler_type):
-                                    try:
-                                        # filtering event
-                                        if await handler.check(self.client, parsed_update):
-                                            # process middlewares
-                                            if len(self.pyrogram_patch_middlewares) > 0:
-                                                for (
-                                                    middleware
-                                                ) in self.pyrogram_patch_middlewares:
-                                                    if middleware == type(handler):
-                                                        await patch_helper._process_middleware(
-                                                            parsed_update,
-                                                            middleware,
-                                                            self.client,
-                                                        )
-                                            args = (parsed_update,)
-                                    except Exception as e:
-                                        log.exception(e)
-                                        continue
-
-                                elif isinstance(handler, RawUpdateHandler):
-                                    try:
-                                        # process middlewares
-                                        if len(self.pyrogram_patch_middlewares) > 0:
-                                            for (
-                                                middleware
-                                            ) in self.pyrogram_patch_middlewares:
-                                                if middleware == type(handler):
-                                                    await patch_helper._process_middleware(
-                                                        parsed_update,
-                                                        middleware,
-                                                        self.client,
-                                                    )
-                                        args = (update, users, chats)
-                                    except pyrogram.StopPropagation:
-                                        pass
-                                if args is None:
-                                    continue
-
+                            if isinstance(handler, handler_type):
                                 try:
-                                    # formation kwargs
-                                    kwargs = await patch_helper._get_data_for_handler(
-                                        handler.callback.__code__.co_varnames
-                                    )
-                                    if inspect.iscoroutinefunction(handler.callback):
-                                        await handler.callback(self.client, *args, **kwargs)
-                                    else:
-                                        args = list(args)
-                                        for v in kwargs.values():
-                                            args.append(v)
-                                        args = tuple(args)
-                                        await self.loop.run_in_executor(
-                                            self.client.executor,
-                                            handler.callback,
-                                            self.client,
-                                            *args
-                                        )
-                                except pyrogram.StopPropagation:
-                                    raise
-                                except pyrogram.ContinuePropagation:
-                                    continue
+                                    # filtering event
+                                    if await handler.check(self.client, parsed_updates):
+                                        # process middlewares
+                                        for middleware in PatchDataPool.pyrogram_patch_middlewares:
+                                            if middleware == type(handler):
+                                                await patch_helper._process_middleware(
+                                                    parsed_updates,
+                                                    middleware,
+                                                    self.client,
+                                                )
+                                        args = (parsed_updates,)
                                 except Exception as e:
                                     log.exception(e)
+                                    PatchDataPool.exclude_helper_from_pool(parsed_updates)
+                                    continue
 
-                                break
+                            elif isinstance(handler, RawUpdateHandler):
+                                try:
+                                    # process middlewares
+                                    for middleware in PatchDataPool.pyrogram_patch_middlewares:
+                                        if middleware == type(handler):
+                                            await patch_helper._process_middleware(
+                                                    parsed_updates,
+                                                    middleware,
+                                                    self.client,
+                                                )
+                                    args = (update, users, chats)
+                                except pyrogram.StopPropagation:
+                                    PatchDataPool.exclude_helper_from_pool(parsed_updates)
+                                    continue
+                            if args is None:
+                                continue
+
+                            try:
+                                # formation kwargs
+                                kwargs = await patch_helper._get_data_for_handler(
+                                    handler.callback.__code__.co_varnames
+                                )
+                                if inspect.iscoroutinefunction(handler.callback):
+                                    await handler.callback(self.client, *args, **kwargs)
+                                else:
+                                    args = list(args)
+                                    for v in kwargs.values():
+                                        args.append(v)
+                                    args = tuple(args)
+                                    await self.loop.run_in_executor(
+                                        self.client.executor,
+                                        handler.callback,
+                                        self.client,
+                                        *args
+                                    )
+                            except pyrogram.StopPropagation:
+                                raise
+                            except pyrogram.ContinuePropagation:
+                                continue
+                            except Exception as e:
+                                log.exception(e)
+                            finally:
+                                PatchDataPool.exclude_helper_from_pool(parsed_updates)
+                            break
+                    PatchDataPool.exclude_helper_from_pool(parsed_updates)
             except pyrogram.StopPropagation:
                 pass
             except Exception as e:

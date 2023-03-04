@@ -3,7 +3,8 @@ from pyrogram.handlers import EditedMessageHandler, MessageHandler
 from pyrogram.types import Message
 
 from pyrogram_patch import patch
-from pyrogram_patch.fsm import State, StateFilter, StateItem, StatesGroup
+from pyrogram_patch.fsm import State, StateItem, StatesGroup
+from pyrogram_patch.fsm.filter import StateFilter
 from pyrogram_patch.fsm.storages import MemoryStorage
 from pyrogram_patch.middlewares import PatchHelper
 from pyrogram_patch.middlewares.middleware_types import (MixedMiddleware,
@@ -31,7 +32,7 @@ class SkipDigitMiddleware(OnMessageMiddleware):
         pass
 
     async def __call__(self, message: Message, client: Client, patch_helper: PatchHelper):
-        is_digit = await patch_helper.get_data("is_digit")
+        is_digit = patch_helper.data["is_digit"]
         if not is_digit:
             if patch_helper.state.state == Parameters.height:
                 return await patch_helper.skip_handler()
@@ -44,8 +45,7 @@ class CheckDigitMiddleware(MixedMiddleware):
 
     async def __call__(self, message: Message, client: Client, patch_helper: PatchHelper):
         if hasattr(message, "text"):
-            return await patch_helper.insert_data("is_digit", message.text.isdigit())
-        return False
+            patch_helper.data["is_digit"] = message.text.isdigit()
 
 
 """APP"""
@@ -67,8 +67,9 @@ patch_manager.include_router(router2)
 
 async def my_filter_function(_, __, update) -> bool:
     if hasattr(update, "text"):
-        some_data = await update.patch_helper.get_data("is_digit")
-        await update.patch_helper.insert_data("some_data_is_digit", some_data)
+        patch_helper = PatchHelper.get_from_pool(update)
+        some_data = patch_helper.data["is_digit"]
+        patch_helper.data["some_data_is_digit"] = some_data
         return True  # False
     return False
 
