@@ -4,11 +4,7 @@ pyrogram_patch is a Python library this is a library that adds middlewares and f
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
-```bash
-pip install https://kotttee.xyz/pip/pyrogram_patch
-```
+from github
 
 # Middlewares
 
