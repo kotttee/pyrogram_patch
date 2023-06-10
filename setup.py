@@ -19,7 +19,7 @@ setup(
     python_requires=">=3.8",
     description="This package will add middlewares, routers and fsm for pyrogram",
     url="https://github.com/kotttee/pyrogram_patch/",
-    install_requires=["pyrogram>=2.0.0"],
+    install_requires=["pyrogram>=2.0.0", "redis~=4.5.4"],
     classifiers=[
         "License :: MIT License",
         "Programming Language :: Python :: 3.8",
