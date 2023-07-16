@@ -4,7 +4,7 @@ pyrogram_patch is a Python library this is a library that adds middlewares and f
 
 ## Installation
 
-pip git+https://github.com/kotttee/pyrogram_patch.git
+pip install git+https://github.com/kotttee/pyrogram_patch.git
 
 # Middlewares
 
