@@ -13,13 +13,13 @@ if sys.version_info < MINIMAL_PY_VERSION:
 
 setup(
     name="pyrogram_patch",
-    version="1.4.0",
+    version="1.5.0",
     license="MIT",
     author="kotttee",
     python_requires=">=3.8",
     description="This package will add middlewares, routers and fsm for pyrogram",
     url="https://github.com/kotttee/pyrogram_patch/",
-    install_requires=["pyrogram>=2.0.0", "redis~=4.5.4"],
+    install_requires=["redis"],
     classifiers=[
         "License :: MIT License",
         "Programming Language :: Python :: 3.8",
